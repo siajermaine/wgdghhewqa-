@@ -43,7 +43,7 @@ SCHEDULED_HOURS = [(8, 0), (21, 0)]  # Specify the hours in Manila Time (14:10 a
 MESSAGES = {
     (8, 0): """
 :¨ ·.· ¨:
-`· . shop is now open <:cinna_shine:1335109271620292639> 
+ `· . shop is now open <:cinna_shine:1335109271620292639> 
 
 ♡ ping <@&1330392036712386571> for fast replies
 ♡ no rushing of orders & no rude buyers 
@@ -54,7 +54,7 @@ MESSAGES = {
 <@&1335091701282373708> @everyone @here""",
     (21, 0): """
 :¨ ·.· ¨:
-`· . shop is now closed <:cinna_shine:1335109271620292639> 
+ `· . shop is now closed <:cinna_shine:1335109271620292639> 
 
 ♡ thank you for your support today!
 ♡ feel free to ask for inquiries [here](https://discord.com/channels/1330329576722923620/1330340000931254354)
