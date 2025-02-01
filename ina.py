@@ -38,10 +38,10 @@ afk_users = {}
 reaction_roles = {}  # Stores reaction-role mappings
 
 # Scheduled Messages (from the first code)
-SCHEDULED_HOURS = [(14, 45), (14, 46)]  # Specify the hours in Manila Time (14:10 and 14:11)
+SCHEDULED_HOURS = [(8, 0), (21, 0)]  # Specify the hours in Manila Time (14:10 and 14:11)
 
 MESSAGES = {
-    (14, 45): """
+    (8, 0): """
 :¨ ·.· ¨:
 `· . shop is now open <:cinna_shine:1335109271620292639> 
 
@@ -51,7 +51,7 @@ MESSAGES = {
 ♡ ready to order? order [here](https://discord.com/channels/1330329576722923620/1332153820838629376)
 
 <@&1335091701282373708> @everyone @here""",
-    (14, 46): """
+    (21, 0): """
 :¨ ·.· ¨:
 `· . shop is now closed <:cinna_shine:1335109271620292639> 
 
