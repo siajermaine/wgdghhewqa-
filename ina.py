@@ -1,9 +1,12 @@
 import io
 import os
 import discord
-from discord.ext import commands
+import asyncio
+from discord.ext import commands, tasks
 from discord import app_commands, Embed, File
 from dotenv import load_dotenv
+from datetime import datetime, time, timedelta
+import pytz
 import aiohttp
 from io import BytesIO
 
@@ -15,6 +18,7 @@ TOKEN = os.getenv("BOT_TOKEN")  # Put your bot token in the .env file
 GUILD_ID = int(os.getenv("GUILD_ID"))  # Set your guild ID
 ROLE_ID = int(os.getenv("ROLE_ID"))  # Role ID that can use the command and dropdown
 QUEUE_CHANNEL_ID = int(os.getenv("QUEUE_CHANNEL_ID"))  # Queue channel ID
+CHANNEL_ID = int(os.getenv("CHANNEL_ID"))  # Specify the target channel ID
 
 intents = discord.Intents.default()
 intents.message_content = True  # Enable message content intent for !vouch command
@@ -33,14 +37,73 @@ MAX_AUTORESPONSES = 10
 afk_users = {}
 reaction_roles = {}  # Stores reaction-role mappings
 
+# Scheduled Messages (from the first code)
+SCHEDULED_HOURS = [(14, 45), (14, 46)]  # Specify the hours in Manila Time (14:10 and 14:11)
+
+MESSAGES = {
+    (14, 45): """
+:¨ ·.· ¨:
+`· . shop is now open <:cinna_shine:1335109271620292639> 
+
+♡ ping <@&1330392036712386571> for fast replies
+♡ no rushing of orders & no rude buyers 
+♡ feel free to ask for inquiries [here](https://discord.com/channels/1330329576722923620/1330340000931254354)
+♡ ready to order? order [here](https://discord.com/channels/1330329576722923620/1332153820838629376)
+
+<@&1335091701282373708> @everyone @here""",
+    (14, 46): """
+:¨ ·.· ¨:
+`· . shop is now closed <:cinna_shine:1335109271620292639> 
+
+♡ thank you for your support today!
+♡ feel free to ask for inquiries [here](https://discord.com/channels/1330329576722923620/1330340000931254354)
+♡ if you still want to order, order [here](https://discord.com/channels/1330329576722923620/1332153820838629376)
+♡ please expect late replies 
+
+<@&1335091701282373708> @everyone @here"""
+}
+
+# Function to calculate the next scheduled time
+def time_until_next_run():
+    tz = pytz.timezone("Asia/Manila")
+    now = datetime.now(tz)
+    next_run = min((datetime.combine(now.date(), time(h, m), tz) for h, m in SCHEDULED_HOURS if now < datetime.combine(now.date(), time(h, m), tz)), default=None)
+    if next_run is None:
+        next_run = datetime.combine(now.date() + timedelta(days=1), time(*SCHEDULED_HOURS[0]), tz)
+    return (next_run - now).total_seconds()
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
+    
     try:
         synced = await bot.tree.sync()
         print(f'Synced {len(synced)} commands')
     except Exception as e:
         print(f'Error syncing commands: {e}')
+    
+    schedule_purge.start()  # Start the scheduled message task
+
+@tasks.loop(seconds=60)
+async def schedule_purge():
+    now = datetime.now(pytz.timezone("Asia/Manila"))
+    if (now.hour, now.minute) in MESSAGES:
+        await purge_and_send_message()
+
+async def purge_and_send_message():
+    channel = bot.get_channel(CHANNEL_ID)
+    if channel is None:
+        print(f"Error: Could not find channel with ID {CHANNEL_ID}")
+        return
+    now = datetime.now(pytz.timezone("Asia/Manila"))
+    msg = MESSAGES.get((now.hour, now.minute))
+    if msg:
+        try:
+            await channel.purge()  # Purge previous messages
+            await channel.send(msg)  # Send new message
+            print("Messages purged and new message sent.")
+        except Exception as e:
+            print(f"Error sending message: {e}")
 
 # Set AFK status
 @bot.tree.command(name="afk", description="Set your AFK status.")
