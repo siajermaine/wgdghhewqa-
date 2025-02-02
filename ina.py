@@ -90,13 +90,6 @@ async def change_status():
         i = (i + 1) % len(statuses)  # Loop back to the first status
         await asyncio.sleep(60)  # Wait 60 seconds before changing status
         
-# Define your /say command
-@bot.tree.command(name="say", description="Make the bot say a message in the channel.")
-@app_commands.describe(message="The message to send.")
-async def say(interaction: discord.Interaction, message: str):
-    """Makes the bot say a message in the channel where the command was used."""
-    await interaction.response.send_message(message)  # Send the message in the same channel
-
 @bot.event
 async def on_ready():
     try:
@@ -468,26 +461,17 @@ async def reaction_role_error(interaction: discord.Interaction, error: Exception
     else:
         await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
 
-@bot.tree.command(name="say", description="Make the bot say something in the channel")
-async def say(interaction: discord.Interaction):
-    """Prompts the user for a message and sends it in the channel."""
+# Slash command: Say a custom message
+@bot.tree.command(name="say", description="Make the bot say a message in the same channel.")
+@app_commands.describe(message="The message you want the bot to send.")
+async def say(interaction: discord.Interaction, message: str):
+    """Sends a custom message in the channel where the command was used."""
+    # Check if the user has the required role (optional)
+    if ROLE_ID not in [role.id for role in interaction.user.roles]:
+        return await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
     
-    # Create a modal to input the message
-    await interaction.response.send_modal(SayModal())
-
-class SayModal(discord.ui.Modal, title="Send a Message"):
-    """Modal for the user to input a message for the bot to send."""
-    message = discord.ui.TextInput(label="Message", placeholder="Enter your message here", required=True)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        # Get the channel where the command was invoked
-        channel = interaction.channel
-
-        # Send the user's message to the channel
-        await channel.send(self.message.value)
-
-        # Respond to the user that the message was sent
-        await interaction.response.send_message(f"Message sent: {self.message.value}", ephemeral=True)
+    # Send the message in the same channel
+    await interaction.response.send_message(message)
 
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
