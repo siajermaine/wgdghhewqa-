@@ -461,21 +461,21 @@ async def reaction_role_error(interaction: discord.Interaction, error: Exception
     else:
         await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
 
-@bot.command()
-async def say(ctx):
-    # Prompt the user for a message
-    await ctx.send("What message would you like to send?")
+@bot.tree.command(name="say")
+async def say(interaction: discord.Interaction):
+    # Prompt the user to send a message
+    await interaction.response.send_message("What message would you like to send?")
     
     # Wait for the user's response
     def check(message):
-        return message.author == ctx.author and message.channel == ctx.channel
+        return message.author == interaction.user and message.channel == interaction.channel
     
-    # Wait until the user responds with a message
     try:
-        response = await bot.wait_for('message', check=check, timeout=60.0)  # 60 seconds timeout
-        await ctx.send(response.content)  # Send the response to the same channel
+        # Wait for the user's response within the same channel
+        response = await bot.wait_for('message', check=check, timeout=60.0)
+        await interaction.channel.send(response.content)  # Send the response to the same channel
     except asyncio.TimeoutError:
-        await ctx.send("You took too long to respond!")
-
+        await interaction.channel.send("You took too long to respond!")
+        
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
