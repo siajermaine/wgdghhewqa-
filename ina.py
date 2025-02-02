@@ -65,6 +65,14 @@ MESSAGES = {
 <@&1335091701282373708> @everyone @here"""
 }
 
+statuses = [
+    "cinna shop",
+    "cinnamoroll",
+    "by Sia",
+    "cinna helper",
+    "cinnamoroll shop"
+]
+
 # Function to calculate the next scheduled time
 def time_until_next_run():
     tz = pytz.timezone("Asia/Manila")
@@ -74,9 +82,18 @@ def time_until_next_run():
         next_run = datetime.combine(now.date() + timedelta(days=1), time(*SCHEDULED_HOURS[0]), tz)
     return (next_run - now).total_seconds()
 
+async def change_status():
+    i = 0
+    while True:
+        # Rotate the status every 10 seconds
+        await bot.change_presence(activity=discord.Game(name=statuses[i]))
+        i = (i + 1) % len(statuses)  # Loop back to the first status
+        await asyncio.sleep(60)  # Wait 60 seconds before changing status
+
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
+    bot.loop.create_task(change_status())
     
     try:
         synced = await bot.tree.sync()
