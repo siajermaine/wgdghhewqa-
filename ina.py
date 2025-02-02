@@ -76,13 +76,15 @@ def time_until_next_run():
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user}')
-    
     try:
-        synced = await bot.tree.sync()
-        print(f'Synced {len(synced)} commands')
+        await bot.tree.sync()
+        print(f"Synced commands for {bot.user}")
+
+        # Check if the command is registered
+        commands = await bot.tree.fetch_commands()
+        print(f"Registered commands: {commands}")
     except Exception as e:
-        print(f'Error syncing commands: {e}')
+        print(f"Failed to sync commands: {e}")
     
     schedule_purge.start()  # Start the scheduled message task
 
