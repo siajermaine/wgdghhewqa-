@@ -89,21 +89,17 @@ async def change_status():
         await bot.change_presence(activity=discord.Game(name=statuses[i]))
         i = (i + 1) % len(statuses)  # Loop back to the first status
         await asyncio.sleep(60)  # Wait 60 seconds before changing status
-        
+
 @bot.event
 async def on_ready():
+    print(f'Logged in as {bot.user}')
+    bot.loop.create_task(change_status())
+    
     try:
-        guild = discord.Object(id=GUILD_ID)  # Define guild
-        await bot.tree.sync(guild=guild)  # Sync only for this guild (fastest method)
-        bot.loop.create_task(change_status())
-        
-        # Fetch and print all registered commands
-        commands = await bot.tree.fetch_commands(guild=guild)
-        print(f"✅ Synced commands: {[cmd.name for cmd in commands]}")
-
-        print(f"🤖 {bot.user} is online and ready!")
+        synced = await bot.tree.sync()
+        print(f'Synced {len(synced)} commands')
     except Exception as e:
-        print(f"❌ Failed to sync commands: {e}")
+        print(f'Error syncing commands: {e}')
     
     schedule_purge.start()  # Start the scheduled message task
 
@@ -297,10 +293,9 @@ class StatusView(discord.ui.View):
         super().__init__()
         self.add_item(StatusDropdown(message))
 
-# Slash command: Add order to queue
 @bot.tree.command(name="queue", description="Add an order to the queue", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(
-    buyer="Select the buyer", item="Enter the item", quantity="Enter the quantity",
+    buyer="Select the buyer", item="Enter the item", quantity="Enter the quantity", 
     channel="Select the order channel", price_paid="Enter the paid price", payment_meth="Enter the payment method"
 )
 @app_commands.checks.has_role(ROLE_ID)
@@ -460,25 +455,6 @@ async def reaction_role_error(interaction: discord.Interaction, error: Exception
         )
     else:
         await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
-
-# Slash command: Say a custom message
-@bot.tree.command(name="say", description="Make the bot say a message in the same channel.")
-@app_commands.describe(message="The message you want the bot to send.")
-async def say(interaction: discord.Interaction, message: str):
-    """Sends a custom message in the channel where the command was used."""
-    # Check if the user has the required role (optional)
-    if ROLE_ID not in [role.id for role in interaction.user.roles]:
-        return await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
-    
-    # Send the message in the same channel
-    await interaction.response.send_message(message)
-
-@bot.tree.command(name="say", description="Sends a message to the channel")
-async def say(interaction: discord.Interaction, message: str):
-    await interaction.response.send_message("Sending your message...")
-
-    # Send the message to the same channel where the command was issued
-    await interaction.channel.send(message)
 
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
