@@ -20,7 +20,7 @@ ROLE_ID = int(os.getenv("ROLE_ID"))  # Role ID that can use the command and drop
 QUEUE_CHANNEL_ID = int(os.getenv("QUEUE_CHANNEL_ID"))  # Queue channel ID
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))  # Specify the target channel ID
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.message_content = True  # Enable message content intent for !vouch command
 intents.messages = True
 intents.guilds = True
