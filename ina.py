@@ -89,6 +89,13 @@ async def change_status():
         await bot.change_presence(activity=discord.Game(name=statuses[i]))
         i = (i + 1) % len(statuses)  # Loop back to the first status
         await asyncio.sleep(60)  # Wait 60 seconds before changing status
+        
+# Define your /say command
+@bot.tree.command(name="say", description="Make the bot say a message in the channel.")
+@app_commands.describe(message="The message to send.")
+async def say(interaction: discord.Interaction, message: str):
+    """Makes the bot say a message in the channel where the command was used."""
+    await interaction.response.send_message(message)  # Send the message in the same channel
 
 @bot.event
 async def on_ready():
@@ -481,12 +488,6 @@ class SayModal(discord.ui.Modal, title="Send a Message"):
 
         # Respond to the user that the message was sent
         await interaction.response.send_message(f"Message sent: {self.message.value}", ephemeral=True)
-
-@bot.tree.command(name="say", description="Make the bot say a message in the channel.")
-@app_commands.describe(message="The message to send.")
-async def say(interaction: discord.Interaction, message: str):
-    """Makes the bot say a message in the channel where the command was used."""
-    await interaction.response.send_message(message)  # Send the message in the same channel
 
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
