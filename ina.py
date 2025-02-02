@@ -461,5 +461,26 @@ async def reaction_role_error(interaction: discord.Interaction, error: Exception
     else:
         await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
 
+@bot.tree.command(name="say", description="Make the bot say something in the channel")
+async def say(interaction: discord.Interaction):
+    """Prompts the user for a message and sends it in the channel."""
+    
+    # Create a modal to input the message
+    await interaction.response.send_modal(SayModal())
+
+class SayModal(discord.ui.Modal, title="Send a Message"):
+    """Modal for the user to input a message for the bot to send."""
+    message = discord.ui.TextInput(label="Message", placeholder="Enter your message here", required=True)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        # Get the channel where the command was invoked
+        channel = interaction.channel
+
+        # Send the user's message to the channel
+        await channel.send(self.message.value)
+
+        # Respond to the user that the message was sent
+        await interaction.response.send_message(f"Message sent: {self.message.value}", ephemeral=True)
+
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
