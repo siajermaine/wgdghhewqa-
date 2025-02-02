@@ -473,5 +473,12 @@ async def say(interaction: discord.Interaction, message: str):
     # Send the message in the same channel
     await interaction.response.send_message(message)
 
+@bot.tree.command(name="say", description="Sends a message to the channel")
+async def say(interaction: discord.Interaction, message: str):
+    await interaction.response.send_message("Sending your message...")
+
+    # Send the message to the same channel where the command was issued
+    await interaction.channel.send(message)
+
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
