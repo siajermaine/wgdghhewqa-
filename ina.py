@@ -95,6 +95,7 @@ async def on_ready():
     try:
         guild = discord.Object(id=GUILD_ID)  # Define guild
         await bot.tree.sync(guild=guild)  # Sync only for this guild (fastest method)
+        bot.loop.create_task(change_status())
         
         # Fetch and print all registered commands
         commands = await bot.tree.fetch_commands(guild=guild)
