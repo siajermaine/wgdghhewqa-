@@ -65,6 +65,14 @@ MESSAGES = {
 <@&1335091701282373708> @everyone @here"""
 }
 
+statuses = [
+    "cinna shop",
+    "cinnamoroll",
+    "by Sia",
+    "cinna helper",
+    "cinnamoroll shop"
+]
+
 # Function to calculate the next scheduled time
 def time_until_next_run():
     tz = pytz.timezone("Asia/Manila")
@@ -74,17 +82,27 @@ def time_until_next_run():
         next_run = datetime.combine(now.date() + timedelta(days=1), time(*SCHEDULED_HOURS[0]), tz)
     return (next_run - now).total_seconds()
 
+async def change_status():
+    i = 0
+    while True:
+        # Rotate the status every 10 seconds
+        await bot.change_presence(activity=discord.Game(name=statuses[i]))
+        i = (i + 1) % len(statuses)  # Loop back to the first status
+        await asyncio.sleep(60)  # Wait 60 seconds before changing status
+
 @bot.event
 async def on_ready():
     try:
-        await bot.tree.sync()
-        print(f"Synced commands for {bot.user}")
+        guild = discord.Object(id=GUILD_ID)  # Define guild
+        await bot.tree.sync(guild=guild)  # Sync only for this guild (fastest method)
+        
+        # Fetch and print all registered commands
+        commands = await bot.tree.fetch_commands(guild=guild)
+        print(f"✅ Synced commands: {[cmd.name for cmd in commands]}")
 
-        # Check if the command is registered
-        commands = await bot.tree.fetch_commands()
-        print(f"Registered commands: {commands}")
+        print(f"🤖 {bot.user} is online and ready!")
     except Exception as e:
-        print(f"Failed to sync commands: {e}")
+        print(f"❌ Failed to sync commands: {e}")
     
     schedule_purge.start()  # Start the scheduled message task
 
@@ -278,9 +296,10 @@ class StatusView(discord.ui.View):
         super().__init__()
         self.add_item(StatusDropdown(message))
 
+# Slash command: Add order to queue
 @bot.tree.command(name="queue", description="Add an order to the queue", guild=discord.Object(id=GUILD_ID))
 @app_commands.describe(
-    buyer="Select the buyer", item="Enter the item", quantity="Enter the quantity", 
+    buyer="Select the buyer", item="Enter the item", quantity="Enter the quantity",
     channel="Select the order channel", price_paid="Enter the paid price", payment_meth="Enter the payment method"
 )
 @app_commands.checks.has_role(ROLE_ID)
