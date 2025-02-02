@@ -20,7 +20,7 @@ ROLE_ID = int(os.getenv("ROLE_ID"))  # Role ID that can use the command and drop
 QUEUE_CHANNEL_ID = int(os.getenv("QUEUE_CHANNEL_ID"))  # Queue channel ID
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))  # Specify the target channel ID
 
-intents = discord.Intents.all()
+intents = discord.Intents.default()
 intents.message_content = True  # Enable message content intent for !vouch command
 intents.messages = True
 intents.guilds = True
@@ -461,10 +461,5 @@ async def reaction_role_error(interaction: discord.Interaction, error: Exception
     else:
         await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
 
-@bot.tree.command(name="say", description="Sends a message as the bot")
-@app_commands.describe(message="The message you want the bot to send")
-async def say(interaction: discord.Interaction, message: str):
-    await interaction.response.send_message(message)
-        
 # Run the bot with the token from the .env file
 bot.run(TOKEN)
